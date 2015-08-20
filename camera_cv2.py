@@ -13,6 +13,17 @@ height = 240
 tracking_width = 70
 tracking_height = 70
 
+def check_for_direction(position_x):
+    if position_x < ((width-tracking_width)/2 - tracking_width):
+        print 'move left!'
+        arduino.write('l')
+    elif position_x > ((width-tracking_width)/2 + tracking_width):
+        print 'move right!'
+        arduino.write('r')
+    else:
+        print 'move front'
+        arduino.write('f')
+
 # initialize arduino port
 port = '/dev/ttyACM0'
 arduino = serial.Serial(port, 9600, timeout=5)
@@ -49,17 +60,20 @@ for frame in camera.capture_continuous(rawCapture, format='bgr', use_video_port=
     image = frame.array
 
     # filtering for tracking algorithm
-    hsv = cv2.cvtColor(frame.array, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     dst = cv2.calcBackProject([hsv], [0], roi_hist, [0,180], 1)
 
     ret, track_window = cv2.meanShift(dst, track_window, term_crit)
     x,y,w,h = track_window
-    cv2.rectangle(frame.array, (x,y), (x+w,y+h), 255, 2)
-    cv2.putText(frame.array, 'Tracked', (x-25, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.CV_AA)
+    cv2.rectangle(image, (x,y), (x+w,y+h), 255, 2)
+    cv2.putText(image, 'Tracked', (x-25, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.CV_AA)
 
     # show the frame
-    cv2.imshow("Raspberry Pi RC Car", frame.array)
+    cv2.imshow("Raspberry Pi RC Car", image)
     key = cv2.waitKey(1) & 0xFF
+
+    # check for direction of the car
+    check_for_direction(x)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
@@ -68,8 +82,10 @@ for frame in camera.capture_continuous(rawCapture, format='bgr', use_video_port=
     if key == ord("q"):
 	break
     if key == ord('g'):
-	arduino.write('g');
+	arduino.write('g')
     if key == ord('s'):
-	arduino.write('s');
+	arduino.write('s')
     if key == ord('a'):
-        arduino.write('a');
+        arduino.write('a')
+
+rawCapture2.truncate(0)

@@ -48,6 +48,14 @@ void loop() {
       command[2] = ch;
   }
   
+  if(command[0] == 'r') {
+    frontMotorRight();
+  } else if(command[0] == 'l') {
+    frontMotorLeft();
+  } else {
+    frontMotorFront();
+  }
+  
   if(command[1] == 'g' && command[2] != 'a') {
     backMotorGo();
     command[2] = 'm';
