@@ -1,9 +1,9 @@
-int fSpeedPin = 3;
+int fSpeedPin = 5;
 int fmotor1APin = 6;
 int fmotor2APin = 7;
 int fspeed_value_motor1 = 255;
 
-int bSpeedPin = 4;
+int bSpeedPin = 8;
 int bmotor1APin = 9;
 int bmotor2APin = 10;
 int bspeed_value_motor2 = 255;
@@ -50,6 +50,7 @@ void loop() {
   
   if(command[0] == 'r') {
     frontMotorRight();
+    Serial.println("r");
   } else if(command[0] == 'l') {
     frontMotorLeft();
   } else {
@@ -103,11 +104,14 @@ void sonarSensor() {
   delayMicroseconds(10);
   digitalWrite(sonarOut, LOW);
   unsigned long pulseTime = pulseIn(sonarIn, HIGH);
-  int distance = pulseTime/50;
+  int distance = pulseTime/58;
   
   Serial.println(distance);
   
-  if(distance < 50) {
+  if(distance < 80) {
+    command[1] = 's';
+    backMotorStop();
+  } else if (distance > 4000) {
     command[1] = 's';
     backMotorStop();
   } else {

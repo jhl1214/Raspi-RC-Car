@@ -8,20 +8,21 @@ import time
 import numpy as np
 
 # define capturing size
-width = 320
-height = 240
-tracking_width = 70
-tracking_height = 70
+width = 160
+height = 120
+tracking_width = 35
+tracking_height = 35
+auto_mode = 0
 
 def check_for_direction(position_x):
-    if position_x < ((width-tracking_width)/2 - tracking_width):
-        print 'move left!'
-        arduino.write('l')
-    elif position_x > ((width-tracking_width)/2 + tracking_width):
+    if position_x <= ((width-tracking_width)/2 - tracking_width/2):
         print 'move right!'
         arduino.write('r')
+    elif position_x >= ((width-tracking_width)/2 + tracking_width/2):
+        print 'move left!'
+        arduino.write('l')
     else:
-        print 'move front'
+        # print 'move front'
         arduino.write('f')
 
 # initialize arduino port
@@ -73,19 +74,45 @@ for frame in camera.capture_continuous(rawCapture, format='bgr', use_video_port=
     key = cv2.waitKey(1) & 0xFF
 
     # check for direction of the car
-    check_for_direction(x)
+    if auto_mode == 1:
+        check_for_direction(x)
+        time.sleep(0.1)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
 
-    # if the `q` key was pressed, break from the loop
+    # distinguish action command for rc car control
     if key == ord("q"):
 	break
-    if key == ord('g'):
-	arduino.write('g')
-    if key == ord('s'):
-	arduino.write('s')
-    if key == ord('a'):
-        arduino.write('a')
+
+    if key == ord("g"):
+	arduino.write("g")
+        auto_mode = 0
+        print "let's go"
+
+    if key == ord("s"):
+	arduino.write("s")
+        auto_mode = 0
+        print "let's stop"
+
+    if key == ord("a"):
+        arduino.write("a")
+        auto_mode = 1
+        print "auto mode"
+
+    if key == ord("r"):
+        arduino.write("r")
+        auto_mode = 0
+        print "turn right"
+
+    if key == ord("l"):
+        arduino.write("l")
+        auto_mode = 0
+        print "turn left"
+
+    if key == ord("f"):
+        arduino.write("f")
+        auto_mode = 0
+        print "go straight"
 
 rawCapture2.truncate(0)
