@@ -8,17 +8,22 @@ import time
 import numpy as np
 
 # define capturing size
-width = 160
-height = 120
-tracking_width = 35
-tracking_height = 35
+width = 320
+height = 240
+tracking_width = 40
+tracking_height = 40
 auto_mode = 0
 
 def check_for_direction(position_x):
-    if position_x <= ((width-tracking_width)/2 - tracking_width/2):
+    if position_x == 0 or position_x == width:
+        print 'out of bound'
+        arduino.write('s')
+        arduino.write('f')
+        arduino.write('m')
+    if position_x <= ((width-tracking_width)/2 - tracking_width):
         print 'move right!'
         arduino.write('r')
-    elif position_x >= ((width-tracking_width)/2 + tracking_width/2):
+    elif position_x >= ((width-tracking_width)/2 + tracking_width):
         print 'move left!'
         arduino.write('l')
     else:

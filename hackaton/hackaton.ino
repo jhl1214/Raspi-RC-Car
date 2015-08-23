@@ -40,6 +40,7 @@ void loop() {
       break;
     case 'g':
     case 's':
+    case 'b':
       command[1] = ch;
       command[2] = 'm';
       break;
@@ -57,11 +58,22 @@ void loop() {
     frontMotorFront();
   }
   
+  if(command[0] == 'r' && command[1] == 's') {
+    frontMotorLeft();
+    backMotorBack();
+  } else if(command[0] == 'l' && command[1] == 's') {
+    frontMotorRight();
+    backMotorBack();
+  }
+  
   if(command[1] == 'g' && command[2] != 'a') {
     backMotorGo();
     command[2] = 'm';
   } else if(command[1] == 's' && command[2] != 'a') {
     backMotorStop();
+    command[2] = 'm';
+  } else if(command[1] == 'b' && command[2] != 'a') {
+    backMotorBack();
     command[2] = 'm';
   }
   
@@ -81,6 +93,11 @@ void backMotorGo() {
 
 void backMotorStop() {
   digitalWrite(bmotor1APin, LOW);
+  digitalWrite(bmotor2APin, LOW);
+}
+
+void backMotorBack() {
+  digitalWrite(bmotor1APin, HIGH);
   digitalWrite(bmotor2APin, LOW);
 }
 
@@ -108,13 +125,23 @@ void sonarSensor() {
   
   Serial.println(distance);
   
-  if(distance < 80) {
+  if(distance < 70 && distance >= 40) {
     command[1] = 's';
     backMotorStop();
-  } else if (distance > 4000) {
+  } else if(distance < 40) {
+    command[1] = 'b';
+    backMotorBack();
+    if(command[0] == 'r') {
+      command[0] = 'l';
+      frontMotorLeft();
+    } else if(command[0] == 'l') {
+      command[0] = 'r';
+      frontMotorRight();
+    }
+  } /*else if (distance > 4000) {
     command[1] = 's';
     backMotorStop();
-  } else {
+  } */else {
     command[1] = 'g';
     backMotorGo();
   }
